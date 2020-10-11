@@ -1,0 +1,117 @@
+# Rime schema
+# encoding: utf-8
+#
+# Taiwanese Pe̍h-ōe-jī input schema 
+#
+
+
+schema: # 輸入法方案
+  schema_id: taigi_poj # 輸入法ID
+  name: Pe̍h-ōe-jī  # 輸入法名稱
+  version: "1.0.0"  # 版本號碼
+  description: Pe̍h-ōe-jī
+  author:
+    - Ngô͘ Hê-bí <ngoohebi@gmail.com>
+    - William Pan <wpan@berkeley.edu>
+
+
+switches:
+  - name: ascii_mode
+    states: ["POJ", "En"]
+    reset: 0   # 預設0是台文，1是英文
+
+
+engine: # 輸入法iăn-jín
+  processors:   # 核心處理器
+    - ascii_composer    # 處理英文模式kap華英文切換
+    - recognizer    # Kap matcher 配，處理符合特定規則ê輸入碼，親像網址、反查等等ê tags。
+    - key_binder    # Tī特定條件，將key pa̍k去其他ê key
+    - speller   # 拼寫處理器，接受字元key，編輯輸入碼
+    - punctuator    # 標點符號處理器，將孤1-ê字元key直接對應到標點符號a̍h是文字
+    - selector  # 候選字選字、換頁
+    - navigator # sòa beh插入去ê位置
+    - express_editor    # 編輯器，處理phah空格、enter key ē送去螢幕，處理bá-kuh key。
+#   - fluid_editor    # 句式編輯器，用來做空格斷詞、用enter key送去螢幕ê【注音】、【語句流】等等輸入方案，替換 express_editor。Mā ē-sái寫做 fluency_editor。
+  
+  segmentors:   # Hun段標記處理
+    - ascii_segmentor   # 標記英文段落（譬喻tī英文模式），字母直接送去螢幕。
+    - matcher   # 配合 recognizer 標記符合特定規則ê段落，親像網址、反查等等，ka特定ê tag。
+    - abc_segmentor # 標記abc輸入碼《abc》ê類型
+    - punct_segmentor   # 標記標點符號段落《punct》
+    - fallback_segmentor    # 將輸入碼liâm做1段
+
+  translators:  # 翻譯輸入ê編碼段，變做一組候選ê文字
+    - punct_translator  # 配合 punct_segmentor 轉換標點符號
+    - table_translator@custom_phrase    # 自訂語句
+    - table_translator  # 碼表翻譯器，用tī倉頡、五筆等等，用碼表做基礎ê輸入方案。
+    - script_translator # script翻譯器，用tī拼音、粵拼等等，用音節表做基礎ê輸入方案。
+    
+  filters:
+    - uniquifier    # 過濾重複的候選字
+
+
+menu:
+  # alternative_select_keys: "qwydfzxv"
+  # page_size: 8
+
+
+speller:    # 拼寫運算詳解 https://github.com/rime/home/wiki/SpellingAlgebra
+ alphabet: 'abceghijklmnoprstuABCEGHIJKLMNOPRSTU123456789'
+ initials: 'abceghijklmnoprstuABCEGHIJKLMNOPRSTU'
+ finals: "123456789"
+ delimiter: " -"
+ algebra:
+   # 簡化輸入
+   - derive/^([abceghijklmnoprstuABCEGHIJKLMNOPRSTU]+)[1-9]$/$1/ # 無聲調輸入，免phah數字
+   - abbrev/^([abceghijklmnoprstuABCEGHIJKLMNOPRSTU]).+[14]$/$1/  # 第1、4聲ē-sái免輸入聲調
+   - abbrev/^([abceghijklmnoprstuABCEGHIJKLMNOPRSTU]).+$/$1/  # 頭1-ê拉丁字母簡拼輸入
+   - abbrev/^((a|b|chh|ch|e|g|h|i|j|k|l|m|ng|n|o|p|r|s|t|u|A|B|Chh|CHH|Ch|CH|E|G|H|I|J|K|L|M|Ng|NG|N|O|P|R|S|T|U)).+$/$1/  # 頭1-ê台語字母簡拼輸入
+   # 容允錯誤處理
+   - derive/ia([nt])([1-9])$/e$1$2/ # 容允錯誤：Kā「ian」寫做「en」、kā「iat」寫做「et」。
+   - derive/(Ia|IA)([ntNT])([1-9])$/E$2$3/ # 容允錯誤：Kā「Ian/IAN」寫做「En/EN」、kā「Iat/IAT」寫做「Et/ET」。
+   - derive/o([ae])([abceghijklmnoprstuABCEGHIJKLMNOPRSTU]*)([1-9])$/u$1$2$3/ # 容允錯誤：Kā「oa」寫做「ua」、kā「oe」寫做「ue」。
+   - derive/O([aeAE])([abceghijklmnoprstuABCEGHIJKLMNOPRSTU]*)([1-9])$/U$1$2$3/ # 容允錯誤：Kā「Oa/OA」寫做「Ua/UA」、kā「Oe/OE」寫做「Ue/UE」。
+   # 容允教育部羅馬字輸入
+   - derive/^ch([h]*)([abceghijklmnoprstuABCEGHIJKLMNOPRSTU]*)([1-9])$/ts$1$2$3/ # 容允教育部羅馬字輸入：Kā白話字「ch」寫做教育部羅馬字「ts」、kā白話字「chh」寫做教育部羅馬字「tsh」。
+   - derive/^Ch([h]*)([abceghijklmnoprstuABCEGHIJKLMNOPRSTU]*)([1-9])$/Ts$1$2$3/ # 容允教育部羅馬字輸入：Kā白話字「Ch」寫做教育部羅馬字「Ts」、kā白話字「Chh」寫做教育部羅馬字「Tsh」。
+   - derive/^CH([H]*)([abceghijklmnoprstuABCEGHIJKLMNOPRSTU]*)([1-9])$/TS$1$2$3/ # 容允教育部羅馬字輸入：Kā白話字「CH」寫做教育部羅馬字「TS」、kā白話字「CHH」寫做教育部羅馬字「TSH」。
+   - derive/e(ng|k)([1-9])$/i$1$2/ # 容允教育部羅馬字輸入：Kā白話字「eng」寫做教育部羅馬字「ing」、kā白話字「ek」寫做教育部羅馬字「ik」。
+   - derive/E(ng|NG|k|K)([1-9])$/I$1$2/ # 容允教育部羅馬字輸入：Kā白話字「Eng/ENG」寫做教育部羅馬字「Ing/ING」、kā白話字「Ek/EK」寫做教育部羅馬字「Ik/IK」。
+   # 容允舊ê輸入款式
+   - derive/oo([abceghijklmnoprstuABCEGHIJKLMNOPRSTU]*)([1-9])$/ou$1$2/ # 容允舊ê輸入款式：Kā白話字ê「o͘」預設ê輸入「oo」phah做「ou」。
+   - derive/^Oo([abceghijklmnoprstuABCEGHIJKLMNOPRSTU]*)([1-9])$/Ou$1$2/ # 容允舊ê輸入款式：Kā白話字ê「o͘」預設ê輸入「Oo」phah做「Ou」。
+   - derive/^OO([abceghijklmnoprstuABCEGHIJKLMNOPRSTU]*)([1-9])$/OU$1$2/ # 容允舊ê輸入款式：Kā白話字ê「o͘」預設ê輸入「OO」phah做「OU」。
+
+translator: # 翻譯特定類型ê編碼段，變做一組候選ê文字
+  dictionary: taigi_poj    # 設定 table_translator 使用ê詞典名：xxx.dict.yaml
+  initial_quality: 0
+
+custom_phrase:
+  dictionary: ""
+  user_dict: custom_phrase
+  db_class: stabledb
+  enable_completion: false
+  enable_sentence: false
+  initial_quality: 1
+
+
+key_binder:
+  import_preset: default
+  bindings:
+    # 候選字換頁ê hotkey
+    -  when: composing
+       accept: Tab
+       send: Page_Down
+
+    -  when: composing
+       accept: Shift+Tab
+       send: Page_Up
+
+    -  when: composing
+       accept: bracketright
+       send: Page_Down
+    
+    -  when: composing
+       accept: bracketleft
+       send: Page_Up
+        
