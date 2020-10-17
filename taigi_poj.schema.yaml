@@ -56,9 +56,9 @@ menu:
 
 
 speller:    # 拼寫運算詳解 https://github.com/rime/home/wiki/SpellingAlgebra
- alphabet: 'abceghijklmnoprstuABCEGHIJKLMNOPRSTU123456789'
- initials: 'abceghijklmnoprstuABCEGHIJKLMNOPRSTU'
- finals: "123456789"
+ alphabet: 'abceghijklmnoprstuABCEGHIJKLMNOPRSTU'
+ # initials: 'abceghijklmnoprstuABCEGHIJKLMNOPRSTU'
+ # finals: "123456789"
  delimiter: " -"
  algebra:
    # 簡化輸入
